@@ -12,7 +12,7 @@ For implementation into Symfony projects, please see [bundle documentation](basi
 
 ## Requirements
 
-* [PHP 8.4](http://php.net/releases/8_4_0.php) or greater
+* [PHP 8.2](http://php.net/releases/8_2_0.php) or greater
 * [Symfony 7.4](https://symfony.com/roadmap/7.4) or greater
 
 ## Installation
