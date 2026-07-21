@@ -36,7 +36,7 @@ vendor/bin/php-cs-fixer fix
 
 ### Running static analysis
 
-You can run static anaysis of code using the following command:
+You can run static analysis of code using the following command:
 
 ```sh
 vendor/bin/phpstan
