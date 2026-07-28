@@ -49,7 +49,9 @@ use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\PasswordHasher\Hasher\MigratingPasswordHasher;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 use Symfony\Component\PasswordHasher\Hasher\PlaintextPasswordHasher;
+use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 final class LeagueOAuth2ServerExtension extends Extension implements PrependExtensionInterface, CompilerPassInterface
 {
@@ -81,6 +83,8 @@ final class LeagueOAuth2ServerExtension extends Extension implements PrependExte
             ->replaceArgument(1, $config['client']['classname'])
         ;
 
+        $this->registerClientSecretHasher($container, $config['client']['hasher']);
+
         if ($config['client']['allow_plaintext_secrets']) {
             trigger_deprecation('league/oauth2-server-bundle', '1.2', 'Setting "client.allow_plaintext_secrets" config option to "true" is deprecated. Use the `league:oauth2-server:rehash-client-secrets` command to rehash existing client secrets and set this option to "false" afterwards.');
             $container->register('league.oauth2_server.password_hasher.plaintext', PlaintextPasswordHasher::class);
@@ -99,6 +103,24 @@ final class LeagueOAuth2ServerExtension extends Extension implements PrependExte
             ->replaceArgument(2, $config['resource_server']['public_key'])
             ->replaceArgument(3, $config['authorization_server']['private_key_passphrase'])
         ;
+    }
+
+    /**
+     * @param array{algorithm: string, cost: int|null, memory_cost: int|null, time_cost: int|null} $hasherConfig
+     */
+    private function registerClientSecretHasher(ContainerBuilder $container, array $hasherConfig): void
+    {
+        // Reuse Symfony's hasher factory so "auto" resolves to the best algorithm
+        // available on the host and the cost options behave exactly as they do
+        // under "security.password_hashers".
+        $factoryConfig = array_filter($hasherConfig, static fn (string|int|null $value): bool => null !== $value);
+
+        $container->register('league.oauth2_server.password_hasher_factory', PasswordHasherFactory::class)
+            ->setArguments([['client_secret' => $factoryConfig]]);
+
+        $container->register('league.oauth2_server.password_hasher', PasswordHasherInterface::class)
+            ->setFactory([new Reference('league.oauth2_server.password_hasher_factory'), 'getPasswordHasher'])
+            ->setArguments(['client_secret']);
     }
 
     public function getAlias(): string

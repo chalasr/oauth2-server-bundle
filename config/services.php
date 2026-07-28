@@ -65,7 +65,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\PasswordHasher\Hasher\NativePasswordHasher;
 
 return static function (ContainerConfigurator $container): void {
     $container->services()
@@ -373,8 +372,7 @@ return static function (ContainerConfigurator $container): void {
             ])
 
         ->set('league.oauth2_server.factory.http_foundation', HttpFoundationFactory::class)
-
-        // Password hasher for client secrets
-        ->set('league.oauth2_server.password_hasher', NativePasswordHasher::class)
     ;
+    // The client secret hasher ("league.oauth2_server.password_hasher") is registered
+    // from the extension since it depends on the "client.hasher" configuration.
 };

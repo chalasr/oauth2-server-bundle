@@ -31,9 +31,10 @@ final class ClientManager implements ClientManagerInterface
 
     public function find(string $identifier): ?ClientInterface
     {
-        $repository = $this->entityManager->getRepository($this->clientFqcn);
-
-        return $repository->findOneBy(['identifier' => $identifier]);
+        // The client identifier is the entity's primary key, so look it up by
+        // reference to reuse Doctrine's identity map and avoid re-querying the
+        // same client several times within a single token request.
+        return $this->entityManager->find($this->clientFqcn, $identifier);
     }
 
     public function save(ClientInterface $client): void

@@ -132,6 +132,18 @@ For implementation into Symfony projects, please see [bundle documentation](basi
         client:
             # Set a custom client class. Must be a League\Bundle\OAuth2ServerBundle\Model\Client
             classname:        League\Bundle\OAuth2ServerBundle\Model\Client
+
+            # Configures the hasher used to store client secrets.
+            hasher:
+                # "auto" lets Symfony pick the best available algorithm. Because client
+                # secrets are high-entropy random values, "sha256" is a secure and much
+                # faster alternative that avoids the cost of a password-grade hash.
+                algorithm:        auto
+                # Bcrypt work factor (only used by the "bcrypt"/"native" algorithms).
+                cost:             ~
+                # Argon2 tuning (only used by the "argon2*"/"sodium" algorithms).
+                memory_cost:      ~
+                time_cost:        ~
     ```
 
 1. Enable the bundle in `config/bundles.php` by adding it to the array:
